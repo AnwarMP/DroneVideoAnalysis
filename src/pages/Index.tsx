@@ -63,7 +63,7 @@ const AppContent: React.FC = () => {
     
     // Configure frame extraction rate (adjust as needed for performance)
     frameExtractor.configureExtraction({
-      frameRate: 1 // Extract 1 frame per second
+      frameRate: 0.5 // Extract 1 frame per second
     });
     
     try {

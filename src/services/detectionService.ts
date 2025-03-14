@@ -1,17 +1,16 @@
-
+// services/detectionService.ts
 import { DetectedFrame, DetectionResponse } from '@/utils/types';
 import { toast } from 'sonner';
 
-// This is a mock service for detection - in a real app, you would integrate with Gemini API
+// This service handles detection using Gemini API
 export class DetectionService {
-  private apiKey: string = '';
-  private apiUrl: string = 'https://api.gemini.google.com/v1/models/gemini-1.5-flash:analyzeImage';
-  private mockMode: boolean = true; // Set to false to use actual API
+  private apiKey: string = import.meta.env.VITE_GEMINI_API_KEY || '';
+  private apiUrl: string = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
+  private mockMode: boolean = false; // Changed to false to use actual API
 
   // Set API key
   public setApiKey(key: string): void {
     this.apiKey = key;
-    this.mockMode = false;
   }
 
   // Process a single frame
@@ -50,19 +49,17 @@ export class DetectionService {
     return results;
   }
   
-  // Real API implementation (would connect to Gemini API)
+  // Real API implementation (connects to Gemini API)
   private async realDetection(frame: DetectedFrame): Promise<DetectedFrame> {
     // Convert base64 image data for API
     const imageData = frame.imageUrl.split(',')[1];
     
-    // In a real implementation, you would make API calls to Gemini
-    // This is a placeholder for the actual implementation
     const body = {
       contents: [
         {
           parts: [
             {
-              text: "Analyze this drone footage frame. Is there a human present in this image? If yes, describe where they are located in the image. Return only a JSON with format: {humanDetected: boolean, description: string, confidence: number between 0 and 1}"
+              text: "Analyze this drone footage frame. Is there a human present in this image? If yes, describe where they are located in the image. Return only a JSON with format: {humanDetected: boolean, description: string, confidence: number between 0 and 1, boundingBox: {x: number, y: number, width: number, height: number} where x,y,width,height are percentages of the image dimensions}"
             },
             {
               inline_data: {
@@ -76,11 +73,10 @@ export class DetectionService {
     };
     
     try {
-      const response = await fetch(this.apiUrl, {
+      const response = await fetch(`${this.apiUrl}?key=${this.apiKey}`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.apiKey}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify(body)
       });
